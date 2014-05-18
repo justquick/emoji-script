@@ -1,9 +1,11 @@
+import os
 import six
 
 from nose_parameterized import parameterized
 
-from .utils import to_unicode, to_html, escape
-from .constants import MAPPING
+from ..utils import to_unicode, to_html, escape
+from ..constants import MAPPING
+from ..compiler import main
 
 
 @parameterized([
@@ -17,12 +19,16 @@ def test_conversion(code, text, html):
     except (UnicodeDecodeError, TypeError):
         text = six.text_type(text)
     text = escape(text)
-    assert to_unicode(code) == text, '{0!r} != {1!r}'.format(to_unicode(code), text)
-    assert to_html(code) == html, '{0!r} != {1!r}'.format(to_html(code), html)
+    assert to_unicode(code) == text, '{!r} != {!r}'.format(to_unicode(code), text)
+    assert to_html(code) == html, '{!r} != {!r}'.format(to_html(code), html)
 
 
 def test_z_rainbow():
     six.print_()
     for code in MAPPING:
-        six.print_(to_unicode(code), end='')
+        six.print_(to_unicode(code), end=' ')
     six.print_()
+
+
+def test_compiler():
+    print(main(os.path.join(os.path.dirname(__file__), 'csvsample.py')))
