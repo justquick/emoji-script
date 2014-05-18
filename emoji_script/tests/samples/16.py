@@ -8,7 +8,7 @@ writer.writerows([
     ('CNET', 'CNET Networks, Inc.', 8.62, -0.13, -1.49)
 ])
 
-# read stocks data, print status messages
+# read stocks data, print(status messages
 stocks = csv.reader(open('stocks.csv', 'rb'))
 status_labels = {-1: 'down', 0: 'unchanged', 1: 'up'}
 for ticker, name, price, change, pct in stocks:

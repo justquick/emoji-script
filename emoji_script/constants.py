@@ -1,4 +1,7 @@
+import six
 from collections import OrderedDict
+
+from .utils import to_unicode, to_html
 
 
 MAPPING = {
@@ -704,7 +707,13 @@ MAPPING = {
     'U+3297': {'name': 'CIRCLED IDEOGRAPH CONGRATULATION'},
     'U+3299': {'name': 'CIRCLED IDEOGRAPH SECRET'}
 }
-MAPPING = OrderedDict(sorted(MAPPING.items(), key=lambda i: int(i[0][2:], 16)))
+# order by ordinality
+keyfunc = lambda item: int(item[0][2:], 16)
+MAPPING = OrderedDict(sorted(MAPPING.items(), key=keyfunc))
+
+for key, value in MAPPING.items():
+    value.update(unicode=to_unicode(key), html=to_html(key))
+    MAPPING[key] = value
 
 
 CHAR_MAPPING = {
@@ -966,5 +975,19 @@ CHAR_MAPPING = {
     '\xff': 'U+1F4F2'
 }
 CHAR_MAPPING = OrderedDict(sorted(CHAR_MAPPING.items()))
+CHAR_MAPPING_REVERSE = {to_unicode(value): key for key, value in CHAR_MAPPING.items()}
 
-EXT_CODE = 'U+1F638'
+EXT_CODE = 'U+1F638'  # GRINNING CAT FACE WITH SMILING EYES
+EXT_UNICODE = to_unicode(EXT_CODE)
+
+TYPES = {
+    str: 'U+1F520',  # INPUT SYMBOL FOR LATIN CAPITAL LETTERS
+    int: 'U+1F522',  # INPUT SYMBOL FOR NUMBERS
+    float: 'U+1F680',  # ROCKET
+    complex: 'U+1F523',  # INPUT SYMBOL FOR SYMBOLS
+}
+if six.PY2:
+    TYPES[long] = 'U+1F0CF'  # PLAYING CARD BLACK JOKER
+    TYPES[unicode] = 'U+1F521'  # INPUT SYMBOL FOR LATIN SMALL LETTERS
+
+TYPES_LOOLUP = {to_unicode(value): key for key, value in TYPES.items()}

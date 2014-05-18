@@ -1,11 +1,14 @@
 import os
 import six
+from glob import glob
 
 from nose_parameterized import parameterized
 
 from ..utils import to_unicode, to_html, escape
-from ..constants import MAPPING
-from ..compiler import from_file
+from ..constants import MAPPING, EXT_UNICODE
+from ..compiler import from_file, decompile
+
+DEC_EXT = MAPPING['U+1F640']['unicode']
 
 
 @parameterized([
@@ -19,16 +22,33 @@ def test_conversion(code, text, html):
     except (UnicodeDecodeError, TypeError):
         text = six.text_type(text)
     text = escape(text)
-    assert to_unicode(code) == text, '{!r} != {!r}'.format(to_unicode(code), text)
-    assert to_html(code) == html, '{!r} != {!r}'.format(to_html(code), html)
+    assert to_unicode(code) == text, six.text_type('{!r} != {!r}').format(to_unicode(code), text)
+    assert to_html(code) == html, six.text_type('{!r} != {!r}').format(to_html(code), html)
 
 
-def test_z_rainbow():
+def test_y_rainbow():
     six.print_()
-    for code in MAPPING:
-        six.print_(to_unicode(code), end=' ')
+    for data in MAPPING.values():
+        six.print_(data['unicode'], end=' ')
     six.print_()
 
 
 def test_compiler():
-    print(from_file(os.path.join(os.path.dirname(__file__), 'csvsample.py')))
+    samples = os.path.join(os.path.dirname(__file__), 'samples', '*.py')
+    for filename in glob(samples):
+        if six.PY2:
+            filename = filename.decode('utf8')
+        if EXT_UNICODE in filename or DEC_EXT in filename:
+            continue
+        from_file(filename)
+
+
+def test_z_decompile():
+    samples = os.path.join(os.path.dirname(__file__), 'samples', '*.*.py')
+    for filename in glob(samples):
+        if six.PY2:
+            filename = filename.decode('utf8')
+        if not EXT_UNICODE in filename:
+            continue
+        with open(filename.replace(EXT_UNICODE, DEC_EXT), 'w') as outfile:
+            outfile.write(decompile(filename))
