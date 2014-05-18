@@ -5,7 +5,7 @@ from nose_parameterized import parameterized
 
 from ..utils import to_unicode, to_html, escape
 from ..constants import MAPPING
-from ..compiler import main
+from ..compiler import from_file
 
 
 @parameterized([
@@ -31,4 +31,4 @@ def test_z_rainbow():
 
 
 def test_compiler():
-    print(main(os.path.join(os.path.dirname(__file__), 'csvsample.py')))
+    print(from_file(os.path.join(os.path.dirname(__file__), 'csvsample.py')))

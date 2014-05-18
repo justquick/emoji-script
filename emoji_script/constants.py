@@ -965,3 +965,6 @@ CHAR_MAPPING = {
     '\xfe': 'U+1F4F1',
     '\xff': 'U+1F4F2'
 }
+CHAR_MAPPING = OrderedDict(sorted(CHAR_MAPPING.items()))
+
+EXT_CODE = 'U+1F638'
