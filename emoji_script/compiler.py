@@ -7,6 +7,7 @@ from meta.asttools import dump_python_source, python_source, print_ast
 
 from .constants import MAPPING, CHAR_MAPPING, CHAR_MAPPING_REVERSE, EXT_UNICODE, TYPES, TYPES_LOOLUP
 
+encoding = six.text_type('# -*- coding: utf-8 -*-\n')
 
 def emojify(node, pad=False):
     if not type(node) in (Str, Num):
@@ -37,7 +38,7 @@ def from_file(filename):
         filename = filename[:-1]
     transformer = EmojiTransformer()
     node = transformer.visit(parse(open(filename).read(), filename))
-    src = dump_python_source(node)
+    src = encoding + dump_python_source(node)
     fname, ext = os.path.splitext(filename)[0], EXT_UNICODE
     with open(six.text_type('{}.{}.py').format(fname, ext), 'w') as fcompile:
         if six.PY2:
@@ -49,7 +50,7 @@ def from_file(filename):
 def from_string(string):
     transformer = EmojiTransformer()
     node = transformer.visit(parse(string))
-    return dump_python_source(node)
+    return encoding + dump_python_source(node)
 
 
 def decompile(filename):
@@ -57,7 +58,7 @@ def decompile(filename):
         value = six.text_type('').join([CHAR_MAPPING_REVERSE[charcode] for charcode in buff])
         return repr(type_class(value))
     with codecs.open(filename, encoding='utf-8') as filein:
-        mode, buff, src = None, [], six.text_type()
+        mode, buff, src = None, [], encoding
         while True:
             char = filein.read(1)
             if not char:
