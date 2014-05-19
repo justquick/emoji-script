@@ -3,11 +3,19 @@ import six
 import codecs
 from ast import Str, Num, Name, NodeTransformer, copy_location, parse
 
-from meta.asttools import dump_python_source, python_source, print_ast
+from meta.asttools import dump_python_source
 
 from .constants import MAPPING, CHAR_MAPPING, CHAR_MAPPING_REVERSE, EXT_UNICODE, TYPES, TYPES_LOOLUP
 
 encoding = six.text_type('# -*- coding: utf-8 -*-\n')
+
+
+def get_boundary(value):
+    for type_class, code in TYPES.items():
+        if isinstance(value, type_class):
+            return MAPPING[code]['unicode']
+    raise ValueError('No boundary found for type {}'.format(type(value)))
+
 
 def emojify(node, pad=False):
     if not type(node) in (Str, Num):
@@ -29,27 +37,39 @@ def emojify(node, pad=False):
 
 
 class EmojiTransformer(NodeTransformer):
+    def doStr(self, node):
+        return get_boundary(node.s), node.s
+
+    def doNum(self, node):
+        return get_boundary(node.n), six.text_type(node.n)
+
     def generic_visit(self, node):
-        return emojify(NodeTransformer.generic_visit(self, node))
+        name = 'do{}'.format(type(node).__name__)
+        node = NodeTransformer.generic_visit(self, node)
+        if hasattr(self, name):
+            boundary, value = getattr(self, name)(node)
+            newstr = boundary
+            for char in value:
+                newstr += MAPPING[CHAR_MAPPING[char]]['unicode']
+            newstr += boundary
+            return copy_location(Name(id=newstr), node)
+        return node
 
 
 def from_file(filename):
     if filename.endswith('.pyc'):
         filename = filename[:-1]
-    transformer = EmojiTransformer()
-    node = transformer.visit(parse(open(filename).read(), filename))
-    src = encoding + dump_python_source(node)
-    fname, ext = os.path.splitext(filename)[0], EXT_UNICODE
-    with open(six.text_type('{}.{}.py').format(fname, ext), 'w') as fcompile:
+    src = from_string(open(filename).read())
+    filename = six.text_type('{}.{}.py').format(os.path.splitext(filename)[0], EXT_UNICODE)
+    with open(filename, 'w') as fcompile:
         if six.PY2:
             src = src.encode('utf8')
         fcompile.write(src)
     return src
 
 
-def from_string(string):
-    transformer = EmojiTransformer()
-    node = transformer.visit(parse(string))
+def from_string(string, filename=''):
+    node = EmojiTransformer().visit(parse(string, filename))
     return encoding + dump_python_source(node)
 
 
