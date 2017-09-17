@@ -1,5 +1,5 @@
 node {
-    docker.build('emoji-script' ).inside {
+    docker.build('emoji-script').inside {
         stage('Test') {
             sh 'env'
             echo '$PATH'
