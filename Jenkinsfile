@@ -1,5 +1,5 @@
 node {
-    docker.build('${env.BUILD_TAG}'.tokenize('/')).inside {
+    docker.build('emoji-script').inside {
         stage('Test') {
             sh 'env'
             echo '$PATH'
