@@ -1,4 +1,4 @@
-FROM python:alpine
+FROM ubuntu:16.04
 
 RUN pip install tox
 
