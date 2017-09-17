@@ -1,4 +1,6 @@
 *.pyc
+/.tox/
+/emoji_script.egg-info/
 
 *.😸.py
 *.🙀.py
